@@ -30,17 +30,23 @@ public with sharing class AccountTriggerHandler {
                 acc.BillingCountry = acc.ShippingCountry;
             }
             
-            Contact con = new Contact();
-            con.FirstName = 'New';
-            con.LastName = 'Contact';
-            con.AccountId = acc.Id; 
-            contacts.add(con);
-            
-        }       
-        
-        insert contacts;         
-                 
-               
+        }   
+
+    }
+
+    public static void afterAccount(List<Account> newAccounts) {
+        List<Contact> newContacts = new List<Contact>();
+
+        for (Account a : newAccounts ) {
+            newContacts.add(new Contact(LastName = 'DefaultContact', Email = 'default@email.com', AccountId = a.Id));
+
+        }
+        if (newContacts.size() > 0) {
+            Database.DMLOptions dml = new Database.DMLOptions(); 
+            dml.DuplicateRuleHeader.allowSave = true;
+            dml.DuplicateRuleHeader.runAsCurrentUser = true;
+            Database.insert(newContacts, dml);           
+        }
 
     }
     

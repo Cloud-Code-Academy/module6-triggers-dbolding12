@@ -1,13 +1,13 @@
-trigger Account_Trigger on Account (after insert) {
+trigger Account_Trigger on Account (before insert, after insert) {
     
-    System.debug(Trigger.operationType);
-    
+   if(Trigger.isBefore) {
     AccountTriggerHandler.updateAccountFileds(Trigger.new);  
-         
 
-   }
+   }else {
+    if(Trigger.isAfter) {
+        AccountTriggerHandler.afterAccount(Trigger.new);
 
-
-
+    }
+  }    
 
 }

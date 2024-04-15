@@ -8,6 +8,36 @@ public with sharing class OpportunityTriggerHandler {
             }
         }
 
+        List<Id> accountIds = new List<Id>();
+        for(Opportunity o : opps) {
+            if(accountIds.size() != null) {
+                accountIds.add(o.AccountId);
+            }
+            
+        }
+
+        System.debug(opps);                                                         
+        if(accountIds.size() > 0) {
+            List<Contact> contacts = [SELECT Id, AccountId, Title FROM Contact WHERE AccountId IN :accountIds AND Title = 'CEO'];
+            Map<Id, Contact> acctConMap = new Map<Id, Contact>();
+
+            for(Contact con : contacts) {
+                acctConMap.put(con.AccountId, con);
+                System.debug(acctConMap);
+            
+            for (Opportunity op : opps) {                
+                if(acctConMap.containsKey(op.AccountId)) {
+                    op.Primary_Contact__c = acctConMap.get(op.AccountId).Id;  
+
+                }  
+                                  
+                                       
+        
+                  }   
+
+                }      
+             }     
+                       
     }
     public static void deleteOppotunity(List<Opportunity> opps) {
         //When an opportunity is deleted prevent the deletion of a closed won opportunity if the account industry is 'Banking'.
@@ -28,44 +58,8 @@ public with sharing class OpportunityTriggerHandler {
                 o.adderror('Cannot delete closed opportunity for a banking account that is won');
                   
 
-         }
+          }
 
-       }
+        }
     }
-
-    public static void afterOpportunity(List<Opportunity> opps) {
-        Set<Id> accountIds = new Set<Id>();
-        for(Opportunity o : opps) {
-            accountIds.add(o.AccountId);
-        }
-
-        System.debug(opps);                                                         
-        Map<Id, Id> acctConMap = new Map<Id, Id>();
-
-        for(Contact con : [SELECT Id, AccountId FROM Contact WHERE AccountId IN :accountIds AND Title = 'CEO']) {
-            acctConMap.put(con.AccountId, con.Id);
-
-        }
-        System.debug(acctConMap);
-            /*When an opportunity is updated set the primary contact...
-            on the opportunity to the contact on the same account with the title of 'CEO'.*/
-            //Need the contacts with the Title of CEO associated with the Account. If the CEO is blank do nothing...
-            //Set the Primary Contact on the Opportunity to the CEO contact on the account associated with the opportunity...
-        List<Opportunity> updateOpportunities = new List<Opportunity>();
-
-        for (Opportunity opp :opps) {
-            if(acctConMap.containsKey(opp.AccountId)){
-                opp.Primary_Contact__c = acctConMap.get(opp.AccountId);
-                updateOpportunities.add(opp);
-
-            }               
-
-        }
-        
-        if(!updateOpportunities.isEmpty()) {
-            System.debug(updateOpportunities);
-            update updateOpportunities;
-        }
-                  
-    }  
 }
